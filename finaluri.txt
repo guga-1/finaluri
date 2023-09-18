@@ -1,0 +1,78 @@
+-------------------------------
+local platform
+local balls = {}
+local score = 0
+local gameOver = false
+
+------------------------------
+function love.load()
+    platform = { x = 300, y = 500, width = 100, height = 20 }
+    soundCatch = love.audio.newSource("catch.wav", "static")
+    soundGameOver = love.audio.newSource("game_over.wav", "static")
+end
+------------------------------
+function love.update(dt)
+    if not gameOver then
+        -- Move the platform
+        if love.keyboard.isDown("left") then
+            platform.x = platform.x - 200 * dt
+        elseif love.keyboard.isDown("right") then
+            platform.x = platform.x + 200 * dt
+        end
+
+        -- Spawn new balls randomly
+        if math.random() < 0.02 then
+            local ball = { x = math.random(0, 600), y = 0, radius = 10 }
+            table.insert(balls, ball)
+        end
+
+        -- Update ball positions
+        for i, ball in ipairs(balls) do
+            ball.y = ball.y + 200 * dt
+
+            -- Check for collision with the platform
+            if ball.y + ball.radius > platform.y and
+               ball.x + ball.radius > platform.x and
+               ball.x - ball.radius < platform.x + platform.width then
+                love.audio.play(soundCatch)
+                table.remove(balls, i)
+                score = score + 1
+            end
+
+            -- Remove balls
+            if ball.y > 600 then
+                table.remove(balls, i)
+            end
+        end
+    end
+end
+
+-- Draw everything
+function love.draw()
+    -- Draw platform
+    love.graphics.rectangle("fill", platform.x, platform.y, platform.width, platform.height)
+
+    -- Draw balls
+    for _, ball in ipairs(balls) do
+        love.graphics.circle("fill", ball.x, ball.y, ball.radius)
+    end
+
+    -- score
+    love.graphics.print("Score: " .. score, 10, 10)
+
+    -- Game over 
+    if gameOver then
+        love.graphics.print("Game Over!", 300, 300)
+    end
+end
+
+--- keypresses
+function love.keypressed(key)
+    if key == "escape" then
+        love.event.quit()
+    end
+end
+-----------
+------------
+love .
+
